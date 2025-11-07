@@ -1,6 +1,6 @@
 export async function sendMessage(message: string): Promise<string> {
   try {
-    const response = await fetch("http://localhost:3000/ollama/chat", {
+    const response = await fetch("https://1d1b2e2c8414.ngrok-free.app/ollama/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: message }), // ✅ CORREGIDO

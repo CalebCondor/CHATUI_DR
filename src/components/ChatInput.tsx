@@ -50,7 +50,7 @@ export default function ChatInput() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/ollama/chat", {
+      const res = await fetch("https://1d1b2e2c8414.ngrok-free.app/ollama/chat", {
         method: "POST",
         body: form,
       });
