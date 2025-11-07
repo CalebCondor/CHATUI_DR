@@ -1,22 +1,23 @@
- "use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import ChatMessage from "./ChatMessage"
-import { useChatStore } from "@/lib/store"
+import { useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import ChatMessage from "./ChatMessage";
+import { useChatStore } from "@/lib/store";
 
 export default function ChatWindow() {
-  const { messages, isLoading } = useChatStore()
-  const endOfMessagesRef = useRef<HTMLDivElement>(null)
+  const { messages, isLoading } = useChatStore();
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   return (
     <div className="flex-1 overflow-y-auto px-3 md:px-4 lg:px-6 py-4 md:py-6 space-y-3 md:space-y-4">
       <AnimatePresence mode="wait">
         {messages.length === 0 ? (
+          // ✅ MENSAJE VACÍO
           <motion.div
             key="empty"
             initial={{ opacity: 0, y: 20 }}
@@ -39,6 +40,7 @@ export default function ChatWindow() {
             </div>
           </motion.div>
         ) : (
+          // ✅ LISTA DE MENSAJES
           <div className="space-y-3 md:space-y-4 max-w-4xl mx-auto w-full">
             {messages.map((message, index) => (
               <motion.div
@@ -51,13 +53,19 @@ export default function ChatWindow() {
               </motion.div>
             ))}
 
+            {/* ✅ Loading message con type y sin texto inconsistente */}
             {isLoading && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
                 <ChatMessage
                   message={{
                     id: "loading",
-                    text: "",
+                    text: "", // pero NO se mostrará "[mensaje vacío]"
                     sender: "assistant",
+                    type: "text",
                     timestamp: new Date(),
                   }}
                   isLoading
@@ -70,5 +78,5 @@ export default function ChatWindow() {
 
       <div ref={endOfMessagesRef} />
     </div>
-  )
+  );
 }
