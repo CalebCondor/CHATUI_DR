@@ -51,7 +51,7 @@ export default function ChatInput() {
 
     try {
       const res = await fetch(
-        "https://046d8171903c.ngrok-free.app/ollama/chat",
+        "https://33df6bf903c4.ngrok-free.app/ollama/chat",
         {
           method: "POST",
           body: form,
