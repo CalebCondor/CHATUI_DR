@@ -10,6 +10,16 @@ import { Send, Loader2 } from "lucide-react";
 import AudioRecorder from "./AudioRecorder";
 import FileUploader from "./FileUploader";
 
+type AIResponse =
+  | string
+  | {
+      isAudio: true;
+      base64: string;
+      mimeType: string;
+    }
+  | null
+  | undefined;
+
 export default function ChatInput() {
   const [input, setInput] = useState("");
   const [isComposing, setIsComposing] = useState(false);
@@ -26,9 +36,7 @@ export default function ChatInput() {
     }
   }, [input]);
 
-  /* -------------------------------------------------------------------------- */
-  /* ✅ AUDIO ENVIADO POR EL USUARIO                                            */
-  /* -------------------------------------------------------------------------- */
+ 
   const handleAudioRecorded = async (
     blob: Blob,
     fileName: string,
@@ -51,7 +59,7 @@ export default function ChatInput() {
 
     try {
       const res = await fetch(
-        "https://33df6bf903c4.ngrok-free.app/ollama/chat",
+        `${process.env.NEXT_PUBLIC_OLLAMA_URL}/ollama/chat`,
         {
           method: "POST",
           body: form,
@@ -75,9 +83,6 @@ export default function ChatInput() {
     }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /* ✅ ARCHIVOS DEL USUARIO                                                   */
-  /* -------------------------------------------------------------------------- */
   const handleFileSelected = (file: File) => {
     const reader = new FileReader();
 
@@ -115,9 +120,6 @@ export default function ChatInput() {
     }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /* ✅ TEXTO ENVIADO POR EL USUARIO                                           */
-  /* -------------------------------------------------------------------------- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -159,7 +161,7 @@ export default function ChatInput() {
   /* -------------------------------------------------------------------------- */
   /* ✅ 🔥 FUNCIÓN CENTRAL: PROCESAR TEXTO O AUDIO DE LA IA                   */
   /* -------------------------------------------------------------------------- */
-  const handleAIResponse = (raw: any) => {
+  const handleAIResponse = (raw: AIResponse) => {
     if (!raw) {
       // Sin respuesta de la IA
       addMessage({
@@ -210,11 +212,13 @@ export default function ChatInput() {
     });
   };
 
-  /* -------------------------------------------------------------------------- */
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && e.ctrlKey && !isComposing) {
-      handleSubmit(e as any);
+      const formEvent = new Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      });
+      e.currentTarget.form?.dispatchEvent(formEvent);
     }
   };
 

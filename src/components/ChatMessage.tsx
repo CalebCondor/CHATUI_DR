@@ -9,7 +9,25 @@ interface ChatMessageProps {
   isLoading?: boolean;
 }
 
+type AudioContent = {
+  isAudio: true;
+  base64: string;
+  mimeType: string;
+};
+
 export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
+  function isAudioContent(content: unknown): content is AudioContent {
+    if (
+      content &&
+      typeof content === "object" &&
+      "isAudio" in content &&
+      (content as Record<string, unknown>).isAudio === true
+    ) {
+      return true;
+    }
+    return false;
+  }
+  
   const isUser = message.sender === "user";
 
   // Normalizar texto
@@ -18,9 +36,7 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
   const hasRealText = safeText.length > 0;
 
   // ✅ Detectar audios (usuario o IA)
-  const isAIAudio =
-    message.type === "audio" ||
-    (message.content && (message.content as any).isAudio === true);
+  const isAIAudio = message.type === "audio" || isAudioContent(message.content);
 
   // ✅ Convertir base64 → URL reproducible
   let audioUrl = message.audioUrl ?? null;
