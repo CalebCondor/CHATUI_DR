@@ -27,7 +27,6 @@ export default function ChatInput() {
 
   const { isLoading, addMessage, setLoading, setError } = useChatStore();
 
-  /** Resize automático */
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
@@ -36,13 +35,11 @@ export default function ChatInput() {
     }
   }, [input]);
 
- 
   const handleAudioRecorded = async (
     blob: Blob,
     fileName: string,
     url: string
   ) => {
-    // Mostrar audio en UI
     addMessage({
       id: Date.now().toString(),
       sender: "user",
@@ -158,12 +155,8 @@ export default function ChatInput() {
     }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /* ✅ 🔥 FUNCIÓN CENTRAL: PROCESAR TEXTO O AUDIO DE LA IA                   */
-  /* -------------------------------------------------------------------------- */
   const handleAIResponse = (raw: AIResponse) => {
     if (!raw) {
-      // Sin respuesta de la IA
       addMessage({
         id: Date.now().toString(),
         sender: "assistant",
@@ -174,7 +167,6 @@ export default function ChatInput() {
       return;
     }
 
-    // ✅ AUDIO DE LA IA
     if (typeof raw === "object" && raw.isAudio) {
       const audioUrl = `data:${raw.mimeType};base64,${raw.base64}`;
 
@@ -190,7 +182,6 @@ export default function ChatInput() {
       return;
     }
 
-    // ✅ TEXTO DE LA IA
     if (typeof raw === "string") {
       addMessage({
         id: Date.now().toString(),
@@ -202,7 +193,6 @@ export default function ChatInput() {
       return;
     }
 
-    // ✅ Cualquier otro caso inesperado
     addMessage({
       id: Date.now().toString(),
       sender: "assistant",
