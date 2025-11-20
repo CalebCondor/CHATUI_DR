@@ -27,7 +27,7 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
     }
     return false;
   }
-  
+
   const isUser = message.sender === "user";
 
   // Normalizar texto
