@@ -1,9 +1,32 @@
-export async function sendMessage(message: string): Promise<string> {
+/**
+ * Convierte texto a voz usando ElevenLabs vía la ruta interna /api/tts.
+ * Devuelve una data-URL "data:audio/mpeg;base64,..." o null si falla.
+ */
+export async function synthesizeSpeech(text: string): Promise<string | null> {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_OLLAMA_URL}/ollama/chat`, {
+    const res = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: message }), // ✅ CORREGIDO
+      body: JSON.stringify({ text }),
+    });
+
+    if (!res.ok) return null;
+
+    const { base64, mimeType } = await res.json();
+    if (!base64) return null;
+
+    return `data:${mimeType};base64,${base64}`;
+  } catch {
+    return null;
+  }
+}
+
+export async function sendMessage(message: string): Promise<string> {
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: message }),
     });
 
     if (!response.ok) {
@@ -16,7 +39,8 @@ export async function sendMessage(message: string): Promise<string> {
     }
 
     const data = await response.json();
-    const reply = data?.response?.content;
+    // Ollama devuelve { response: "texto completo" } cuando stream: false
+    const reply: string = data?.response;
 
     if (!reply) throw new Error("Respuesta inválida del servidor");
 

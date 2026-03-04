@@ -21,6 +21,9 @@ export interface Message {
     mimeType: string;
     base64: string;
   } | null;
+
+  // ✅ TTS generado por ElevenLabs (data-URL)
+  ttsAudioUrl?: string | null;
 }
 
 interface ChatStore {
@@ -28,6 +31,7 @@ interface ChatStore {
   isLoading: boolean;
   error: string | null;
   addMessage: (message: Message) => void;
+  updateMessage: (id: string, patch: Partial<Message>) => void;
   clearMessages: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -45,6 +49,13 @@ export const useChatStore = create<ChatStore>()(
         addMessage: (message: Message) =>
           set((state) => ({
             messages: [...state.messages, message],
+          })),
+
+        updateMessage: (id: string, patch: Partial<Message>) =>
+          set((state) => ({
+            messages: state.messages.map((m) =>
+              m.id === id ? { ...m, ...patch } : m
+            ),
           })),
 
         clearMessages: () =>

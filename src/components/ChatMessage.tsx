@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import type { Message } from "@/lib/store";
 import AudioPlayer from "./AudioPlayer";
@@ -16,6 +17,8 @@ type AudioContent = {
 };
 
 export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
+  /*const autoPlayRef = useRef<HTMLAudioElement>(null);*/
+
   function isAudioContent(content: unknown): content is AudioContent {
     if (
       content &&
@@ -32,19 +35,40 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
 
   // Normalizar texto
   const safeText = typeof message.text === "string" ? message.text.trim() : "";
-
   const hasRealText = safeText.length > 0;
 
-  // ✅ Detectar audios (usuario o IA)
+  // ✅ Detectar audios (usuario o IA grabado)
   const isAIAudio = message.type === "audio" || isAudioContent(message.content);
 
   // ✅ Convertir base64 → URL reproducible
   let audioUrl = message.audioUrl ?? null;
-
   if (!audioUrl && isAIAudio && message.content?.base64) {
     audioUrl = `data:${message.content.mimeType};base64,${message.content.base64}`;
   }
 
+  // ✅ TTS de ElevenLabs: reproducir automáticamente al llegar
+  /*
+  const ttsUrl = message.ttsAudioUrl ?? null;
+
+  useEffect(() => {
+    if (ttsUrl && autoPlayRef.current) {
+      autoPlayRef.current.src = ttsUrl;
+      autoPlayRef.current.play().catch(() => {
+        // El navegador puede bloquear autoplay; el usuario verá el player manual
+      });
+    }
+  }, [ttsUrl]);
+  */
+ {/* 
+          <div className="space-y-2">
+            <p className="whitespace-pre-wrap">{safeText}</p>
+            {ttsUrl && !isUser && (
+              <div className="pt-1 border-t border-slate-200 dark:border-slate-700">
+                <audio ref={autoPlayRef} className="hidden" />
+                <AudioPlayer audioUrl={ttsUrl} fileName="respuesta-voz.mp3" />
+              </div>
+            )}
+          </div>    */}
   return (
     <motion.div
       layout
@@ -68,7 +92,7 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
         {isLoading ? (
           <div className="flex gap-1.5">...</div>
         ) : isAIAudio && audioUrl ? (
-          // ✅ AUDIO DE IA O USUARIO (SEA base64 O URL)
+          // ✅ AUDIO DE IA O USUARIO (base64 O URL)
           <AudioPlayer
             audioUrl={audioUrl}
             fileName={message.fileName ?? "audio.mp3"}
@@ -85,13 +109,12 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
             >
               {message.fileName}
             </a>
-
             {hasRealText && <p className="pt-2">{safeText}</p>}
           </div>
         ) : hasRealText ? (
           <p className="whitespace-pre-wrap">{safeText}</p>
+         
         ) : (
-          // ✅ Solo aparece si NO hay audio y NO hay texto
           <p className="opacity-50 italic">[mensaje vacío]</p>
         )}
       </div>
@@ -104,3 +127,4 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
     </motion.div>
   );
 }
+
