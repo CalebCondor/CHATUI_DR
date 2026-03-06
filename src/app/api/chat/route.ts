@@ -6,6 +6,7 @@ import {
   esPreguntaMedica,
 } from "@/lib/doctor-recetas";
 
+
 // Initialize Anthropic client
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
