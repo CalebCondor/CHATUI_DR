@@ -36,42 +36,46 @@ export default function ChatInput() {
   }, [input]);
 
   const handleAudioRecorded = async (
-    blob: Blob,
+    _blob: Blob,
     fileName: string,
-    url: string
+    url: string,
+    transcript: string
   ) => {
+    const audioMessageId = Date.now().toString();
+
+    console.log("[ChatInput] Audio recorded, transcript:", transcript);
+
+    // Show the audio bubble with the transcript already attached
     addMessage({
-      id: Date.now().toString(),
+      id: audioMessageId,
       sender: "user",
       timestamp: new Date(),
       type: "audio",
       audioUrl: url,
       fileName,
+      text: transcript.trim() || undefined,
     });
 
-    const form = new FormData();
-    form.append("file", blob, fileName);
+    if (!transcript.trim()) {
+      // No speech detected — nothing to send to the bot
+      console.warn("[ChatInput] No transcript detected");
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_OLLAMA_URL}/ollama/chat`,
-        {
-          method: "POST",
-          body: form,
-        }
-      );
-
-      const data = await res.json();
-      const raw = data?.response?.content;
-
+      // Send the browser-transcribed text straight to the chatbot
+      const raw = await sendMessage(transcript.trim());
       handleAIResponse(raw);
-    } catch {
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : "Error procesando audio";
+
       addMessage({
         id: (Date.now() + 1).toString(),
         sender: "assistant",
-        text: "Error procesando audio.",
+        text: `Error: ${errMsg}`,
         type: "text",
         timestamp: new Date(),
       });

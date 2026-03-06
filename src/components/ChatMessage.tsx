@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import type { Message } from "@/lib/store";
 import AudioPlayer from "./AudioPlayer";
@@ -17,7 +16,6 @@ type AudioContent = {
 };
 
 export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
-  /*const autoPlayRef = useRef<HTMLAudioElement>(null);*/
 
   function isAudioContent(content: unknown): content is AudioContent {
     if (
@@ -93,10 +91,19 @@ export default function ChatMessage({ message, isLoading }: ChatMessageProps) {
           <div className="flex gap-1.5">...</div>
         ) : isAIAudio && audioUrl ? (
           // ✅ AUDIO DE IA O USUARIO (base64 O URL)
-          <AudioPlayer
-            audioUrl={audioUrl}
-            fileName={message.fileName ?? "audio.mp3"}
-          />
+          <div className="space-y-2">
+            <AudioPlayer
+              audioUrl={audioUrl}
+              fileName={message.fileName ?? "audio.mp3"}
+            />
+            {hasRealText && (
+              <p className={`text-xs md:text-sm mt-2 pt-2 border-t border-white/20 whitespace-pre-wrap ${
+                isUser ? "text-blue-100" : "text-slate-600 dark:text-slate-300"
+              }`}>
+                {safeText}
+              </p>
+            )}
+          </div>
         ) : message.type === "file" && message.fileName ? (
           <div>
             <p className="font-medium">📎 Archivo enviado:</p>
